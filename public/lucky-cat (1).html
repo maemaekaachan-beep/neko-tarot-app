@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ねこタロット - 今日のラッキーキャット</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-4.png" type="image/png">
+<meta name="theme-color" content="#1a1025">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@400;600&display=swap');
+  :root{--bg:#1a1025;--card-bg:#2d1f3d;--accent:#e8b4f8;--accent2:#f5d76e;--accent3:#a8e6cf;--text:#f0e6ff;--text-muted:#b09ec0;--border:#5a3d7a;--glow:rgba(232,180,248,0.3);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Zen Maru Gothic',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(90,40,120,0.4) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(40,20,80,0.5) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d,3s) ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.2;}50%{opacity:1;transform:scale(1.3);}}
+  .container{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:20px 16px 60px;}
+  header{text-align:center;padding:24px 0 20px;}
+  .cat-emoji{font-size:52px;display:block;margin-bottom:8px;animation:float 4s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  h1{font-family:'Shippori Mincho',serif;font-size:clamp(20px,5vw,28px);color:var(--accent);letter-spacing:0.1em;text-shadow:0 0 20px var(--glow);margin-bottom:4px;}
+  .subtitle{font-size:13px;color:var(--text-muted);letter-spacing:0.15em;}
+  .btn{width:100%;padding:14px;border-radius:12px;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.08em;transition:all 0.3s;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-main{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;color:white;}
+  .btn-main:hover:not(:disabled){background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 30px rgba(139,92,246,0.5);transform:translateY(-2px);}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;transform:none !important;}
+  .btn-reset{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:13px;}
+  .btn-reset:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-home{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:13px;margin-bottom:16px;}
+  .btn-home:hover{border-color:var(--accent);color:var(--accent);}
+
+  .cat-card{background:var(--card-bg);border:1px solid var(--accent);border-radius:20px;padding:28px 24px;box-shadow:0 0 40px var(--glow);display:none;margin-bottom:16px;text-align:center;}
+  .cat-card.show{display:block;}
+  .lucky-cat-img{font-size:80px;margin:8px 0 16px;animation:bounce2 2s ease-in-out infinite;}
+  @keyframes bounce2{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-8px) scale(1.05);}}
+  .cat-name{font-family:'Shippori Mincho',serif;font-size:24px;color:var(--accent2);margin-bottom:6px;font-weight:600;}
+  .cat-type{font-size:13px;color:var(--text-muted);margin-bottom:16px;}
+  .cat-message{font-size:14px;line-height:1.9;color:var(--text);text-align:left;background:rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .cat-power{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .power-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px;}
+  .power-label{font-size:11px;color:var(--text-muted);width:80px;flex-shrink:0;}
+  .power-value{font-size:13px;color:var(--accent2);font-weight:700;}
+  .cat-advice{font-size:13px;color:var(--accent);font-style:italic;text-align:center;}
+
+  .loading{text-align:center;padding:32px;color:var(--text-muted);font-size:14px;}
+  .loading-cats{font-size:28px;letter-spacing:8px;animation:bounce 1s ease-in-out infinite;display:block;margin-bottom:12px;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  .error-msg{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);border-radius:10px;padding:11px 14px;color:#fca5a5;font-size:13px;margin-top:8px;display:none;}
+  .error-msg.show{display:block;}
+  .summon-area{text-align:center;margin:24px 0;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="container">
+  <header>
+    <span class="cat-emoji">🐈</span>
+    <h1>今日のラッキーキャット</h1>
+    <p class="subtitle">〜 あなたの守り猫は？ 〜</p>
+  </header>
+  <a href="/menu.html"><button class="btn btn-home">← メニューに戻る</button></a>
+
+  <div class="summon-area">
+    <button class="btn btn-main" id="btnSummon" onclick="summonCat()">🐱 今日の守り猫を召喚する</button>
+  </div>
+
+  <div class="cat-card" id="catCard">
+    <div id="catContent"></div>
+  </div>
+  <div class="error-msg" id="errorMsg"></div>
+  <button class="btn btn-reset" id="btnReset" onclick="resetAll()" style="display:none">🔄 もう一度召喚する</button>
+</div>
+<script>
+// 猫の画像データ
+const CAT_IMAGES = [
+  {num:1, type:'黒猫'},
+  {num:2, type:'白猫'},
+  {num:3, type:'グレー'},
+  {num:4, type:'黒白'},
+  {num:5, type:'グレー白'},
+  {num:6, type:'茶とら'},
+  {num:7, type:'キジトラ'},
+  {num:8, type:'サバトラ'},
+  {num:9, type:'茶白'},
+  {num:10, type:'キジ白'},
+  {num:11, type:'サバ白'},
+  {num:12, type:'三毛猫'},
+  {num:13, type:'サビ猫'},
+  {num:14, type:'黒白とび'},
+  {num:15, type:'ポインテッド'},
+];
+const IMG_BASE = 'https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
+
+async function summonCat(){
+  const btnSummon=document.getElementById('btnSummon');
+  btnSummon.disabled=true;
+  const catCard=document.getElementById('catCard');
+  const catContent=document.getElementById('catContent');
+  const errorMsg=document.getElementById('errorMsg');
+  errorMsg.classList.remove('show');
+  catCard.classList.add('show');
+  catContent.innerHTML=`<div class="loading"><span class="loading-cats">🐱 🐈 😸</span>守り猫を呼んでいるにゃ…</div>`;
+
+  // 今日の日付をシードにして毎日同じ猫が出る
+  const today=new Date();
+  const seed=(today.getFullYear()*10000)+(today.getMonth()*100)+today.getDate();
+  const catData=CAT_IMAGES[seed % CAT_IMAGES.length];
+  const imgUrl=IMG_BASE+catData.num+'.png';
+
+  const todayStr=today.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'long'});
+  const prompt=`あなたはねこタロット占い師の「ねこ先生」です。今日（${todayStr}）の守り猫は「${catData.type}」です。
+
+以下のJSON形式で返してください（JSONのみ）：
+{
+  "name": "この猫の名前（ひらがな・カタカナで5文字以内）",
+  "message": "この${catData.type}の猫が今日あなたに伝えたいメッセージ（100文字程度、温かく具体的に）",
+  "power": "この猫の特別な力（20文字以内）",
+  "mission": "今日この猫があなたのそばにいる理由（30文字以内）",
+  "lucky_action": "この猫からのアドバイス・行動提案（30文字以内）",
+  "advice": "ねこ先生からひとこと（30文字程度）"
+}`;
+
+  try{
+    const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const cat=JSON.parse(clean);
+    catContent.innerHTML=`
+      <img src="${imgUrl}" alt="${catData.type}" style="width:160px;height:160px;object-fit:contain;margin:8px auto 16px;display:block;animation:bounce2 2s ease-in-out infinite;"
+        onerror="this.outerHTML='<div class=\\'lucky-cat-img\\'>🐱</div>'">
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-type">${catData.type}</div>
+      <div class="cat-message">${cat.message}</div>
+      <div class="cat-power">
+        <div class="power-item"><span class="power-label">✨ 特別な力</span><span class="power-value">${cat.power}</span></div>
+        <div class="power-item"><span class="power-label">🎯 今日の使命</span><span class="power-value">${cat.mission}</span></div>
+        <div class="power-item"><span class="power-label">🍀 行動提案</span><span class="power-value">${cat.lucky_action}</span></div>
+      </div>
+      <p class="cat-advice">🐱 ${cat.advice}</p>
+    `;
+    document.getElementById('btnReset').style.display='flex';
+  }catch(err){
+    catCard.classList.remove('show');
+    errorMsg.textContent=`エラーが発生しましたにゃ…: ${err.message}`;
+    errorMsg.classList.add('show');
+    btnSummon.disabled=false;
+  }
+}
+
+function resetAll(){
+  document.getElementById('catCard').classList.remove('show');
+  document.getElementById('errorMsg').classList.remove('show');
+  document.getElementById('btnReset').style.display='none';
+  document.getElementById('btnSummon').disabled=false;
+}
+
+function createStars(){const c=document.getElementById('stars');for(let i=0;i<60;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+0.5;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s;`;c.appendChild(s);}}
+createStars();
+</script>
+</body>
+</html>
