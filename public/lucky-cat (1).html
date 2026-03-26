@@ -107,7 +107,7 @@ async function summonCat(){
   const today=new Date();
   const seed=(today.getFullYear()*10000)+(today.getMonth()*100)+today.getDate();
   const catData=CAT_IMAGES[seed % CAT_IMAGES.length];
-  const imgUrl=IMG_BASE+catData.num+'.png';
+ 　const imgUrl=IMG_BASE+catData.num+'.png';
 
   const todayStr=today.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'long'});
   const prompt=`あなたはねこタロット占い師の「ねこ先生」です。今日（${todayStr}）の守り猫は「${catData.type}」です。
