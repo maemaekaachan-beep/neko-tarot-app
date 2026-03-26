@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ねこタロット - 今日のおみくじ</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-4.png" type="image/png">
+<meta name="theme-color" content="#1a1025">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@400;600&display=swap');
+  :root{--bg:#1a1025;--card-bg:#2d1f3d;--accent:#e8b4f8;--accent2:#f5d76e;--accent3:#a8e6cf;--text:#f0e6ff;--text-muted:#b09ec0;--border:#5a3d7a;--glow:rgba(232,180,248,0.3);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Zen Maru Gothic',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(90,40,120,0.4) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(40,20,80,0.5) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d,3s) ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.2;}50%{opacity:1;transform:scale(1.3);}}
+  .container{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:20px 16px 60px;}
+  header{text-align:center;padding:24px 0 20px;}
+  .cat-emoji{font-size:52px;display:block;margin-bottom:8px;animation:float 4s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  h1{font-family:'Shippori Mincho',serif;font-size:clamp(22px,5vw,32px);color:var(--accent);letter-spacing:0.1em;text-shadow:0 0 20px var(--glow);margin-bottom:4px;}
+  .subtitle{font-size:13px;color:var(--text-muted);letter-spacing:0.15em;}
+  .btn{width:100%;padding:14px;border-radius:12px;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.08em;transition:all 0.3s;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-main{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border:none;color:white;}
+  .btn-main:hover:not(:disabled){background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 4px 30px rgba(139,92,246,0.5);transform:translateY(-2px);}
+  .btn:disabled{opacity:0.45;cursor:not-allowed;transform:none !important;}
+  .btn-reset{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:13px;}
+  .btn-reset:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-home{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:13px;margin-bottom:16px;}
+  .btn-home:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* おみくじ筒 */
+  .mikuji-container{text-align:center;margin:24px 0;}
+  .mikuji-tube{
+    width:80px;height:140px;margin:0 auto 20px;
+    background:linear-gradient(135deg,#8b5cf6,#5a3d7a);
+    border-radius:40px 40px 20px 20px;
+    border:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:all 0.3s;
+    box-shadow:0 0 20px var(--glow);
+    position:relative;overflow:hidden;
+  }
+  .mikuji-tube:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 0 30px var(--glow);}
+  .mikuji-tube::before{content:'';position:absolute;top:0;left:0;right:0;height:30%;background:rgba(255,255,255,0.1);border-radius:40px 40px 0 0;}
+  .mikuji-tube-text{font-size:13px;color:white;font-weight:700;letter-spacing:0.1em;writing-mode:vertical-rl;}
+  .tap-hint{font-size:12px;color:var(--text-muted);}
+
+  /* 結果カード */
+  .result-card{
+    background:var(--card-bg);border:1px solid var(--accent);
+    border-radius:20px;padding:28px 24px;
+    box-shadow:0 0 40px var(--glow);
+    display:none;margin-bottom:16px;
+    text-align:center;
+  }
+  .result-card.show{display:block;}
+  .fortune-rank{
+    font-family:'Shippori Mincho',serif;
+    font-size:36px;font-weight:700;
+    margin-bottom:8px;
+    letter-spacing:0.05em;
+  }
+  .fortune-rank.daikichi{color:#f5d76e;}
+  .fortune-rank.kichi{color:#a8e6cf;}
+  .fortune-rank.chukichi{color:#e8b4f8;}
+  .fortune-rank.shokichi{color:#93c5fd;}
+  .fortune-rank.kyo{color:#fca5a5;}
+  .cat-image{font-size:64px;margin:16px 0;}
+  .fortune-text{
+    font-size:14px;line-height:1.9;color:var(--text);
+    text-align:left;margin-top:16px;
+  }
+  .fortune-items{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    margin-top:16px;
+  }
+  .fortune-item{
+    background:rgba(255,255,255,0.04);
+    border-radius:10px;padding:10px;
+    text-align:center;
+  }
+  .fortune-item-label{font-size:10px;color:var(--text-muted);margin-bottom:4px;}
+  .fortune-item-value{font-size:13px;font-weight:700;color:var(--accent2);}
+
+  .loading{text-align:center;padding:32px;color:var(--text-muted);font-size:14px;}
+  .loading-cats{font-size:28px;letter-spacing:8px;animation:bounce 1s ease-in-out infinite;display:block;margin-bottom:12px;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  .error-msg{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);border-radius:10px;padding:11px 14px;color:#fca5a5;font-size:13px;margin-top:8px;display:none;}
+  .error-msg.show{display:block;}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="container">
+  <header>
+    <span class="cat-emoji">🎋</span>
+    <h1>今日のおみくじ</h1>
+    <p class="subtitle">〜 今日の運勢を猫が告げる 〜</p>
+  </header>
+  <a href="/menu.html"><button class="btn btn-home">← メニューに戻る</button></a>
+
+  <div class="mikuji-container" id="mikujiArea">
+    <div class="mikuji-tube" onclick="drawOmikuji()">
+      <span class="mikuji-tube-text">おみくじ</span>
+    </div>
+    <p class="tap-hint">タップしてひく</p>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div id="resultContent"></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+  <button class="btn btn-reset" id="btnReset" onclick="resetAll()" style="display:none">🔄 もう一度ひく</button>
+</div>
+
+<script>
+const TODAY=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+async function drawOmikuji(){
+  const tube=document.querySelector('.mikuji-tube');
+  tube.style.pointerEvents='none';
+  tube.style.opacity='0.5';
+  const resultCard=document.getElementById('resultCard');
+  const resultContent=document.getElementById('resultContent');
+  const errorMsg=document.getElementById('errorMsg');
+  errorMsg.classList.remove('show');
+  resultCard.classList.add('show');
+  resultContent.innerHTML=`<div class="loading"><span class="loading-cats">🐱 🎋 ✨</span>ねこ先生がおみくじを読んでいるにゃ…</div>`;
+
+  const ranks=['大吉','吉','中吉','小吉','末吉','凶'];
+  const weights=[15,30,25,15,10,5];
+  let rand=Math.random()*100,cumulative=0,rank='吉';
+  for(let i=0;i<ranks.length;i++){cumulative+=weights[i];if(rand<cumulative){rank=ranks[i];break;}}
+
+  const prompt=`あなたはねこタロット占い師の「ねこ先生」です。今日（${TODAY}）のおみくじで「${rank}」が出ました。
+
+以下のJSON形式で今日の運勢を返してください（JSONのみ、マークダウン記法なし）：
+{
+  "rank": "${rank}",
+  "message": "今日の総合的なメッセージ（80文字程度、ねこっぽい語尾で）",
+  "love": "恋愛運を一言で（10文字以内）",
+  "work": "仕事運を一言で（10文字以内）",
+  "money": "金運を一言で（10文字以内）",
+  "health": "健康運を一言で（10文字以内）",
+  "lucky_item": "今日のラッキーアイテム（5文字以内）",
+  "lucky_color": "今日のラッキーカラー（5文字以内）",
+  "advice": "今日のねこ先生からひとこと（40文字程度）",
+  "cat_emoji": "その運勢に合った猫の絵文字1つ"
+}`;
+
+  try{
+    const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'';
+    const clean=text.replace(/```json|```/g,'').trim();
+    const result=JSON.parse(clean);
+    const rankClass={'大吉':'daikichi','吉':'kichi','中吉':'chukichi','小吉':'shokichi','末吉':'shokichi','凶':'kyo'}[result.rank]||'kichi';
+    resultContent.innerHTML=`
+      <div class="fortune-rank ${rankClass}">${result.rank}</div>
+      <div class="cat-image">${result.cat_emoji||'🐱'}</div>
+      <p class="fortune-text">${result.message}</p>
+      <div class="fortune-items">
+        <div class="fortune-item"><div class="fortune-item-label">💕 恋愛運</div><div class="fortune-item-value">${result.love}</div></div>
+        <div class="fortune-item"><div class="fortune-item-label">💼 仕事運</div><div class="fortune-item-value">${result.work}</div></div>
+        <div class="fortune-item"><div class="fortune-item-label">💰 金運</div><div class="fortune-item-value">${result.money}</div></div>
+        <div class="fortune-item"><div class="fortune-item-label">🌿 健康運</div><div class="fortune-item-value">${result.health}</div></div>
+        <div class="fortune-item"><div class="fortune-item-label">🍀 ラッキーアイテム</div><div class="fortune-item-value">${result.lucky_item}</div></div>
+        <div class="fortune-item"><div class="fortune-item-label">🎨 ラッキーカラー</div><div class="fortune-item-value">${result.lucky_color}</div></div>
+      </div>
+      <p style="margin-top:16px;font-size:13px;color:var(--accent);font-style:italic;text-align:center">🐱 ${result.advice}</p>
+    `;
+    document.getElementById('btnReset').style.display='flex';
+  }catch(err){
+    resultCard.classList.remove('show');
+    errorMsg.textContent=`エラーが発生しましたにゃ…: ${err.message}`;
+    errorMsg.classList.add('show');
+    tube.style.pointerEvents='auto';tube.style.opacity='1';
+  }
+}
+
+function resetAll(){
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('errorMsg').classList.remove('show');
+  document.getElementById('btnReset').style.display='none';
+  const tube=document.querySelector('.mikuji-tube');
+  tube.style.pointerEvents='auto';tube.style.opacity='1';
+}
+
+function createStars(){const c=document.getElementById('stars');for(let i=0;i<60;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+0.5;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s;`;c.appendChild(s);}}
+createStars();
+</script>
+</body>
+</html>

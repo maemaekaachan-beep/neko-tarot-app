@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ねこタロット</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-4.png" type="image/png">
+<link rel="apple-touch-icon" href="/icon-4.png">
+<meta name="theme-color" content="#1a1025">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Shippori+Mincho:wght@400;600&display=swap');
+  :root{
+    --bg:#1a1025;--card-bg:#2d1f3d;
+    --accent:#e8b4f8;--accent2:#f5d76e;--accent3:#a8e6cf;
+    --text:#f0e6ff;--text-muted:#b09ec0;--border:#5a3d7a;
+    --glow:rgba(232,180,248,0.3);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Zen Maru Gothic',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(90,40,120,0.4) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(40,20,80,0.5) 0%,transparent 50%);pointer-events:none;z-index:0;}
+  .stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d,3s) ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.2;}50%{opacity:1;transform:scale(1.3);}}
+  .container{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:20px 16px 60px;}
+  header{text-align:center;padding:32px 0 28px;}
+  .cat-emoji{font-size:52px;display:block;margin-bottom:8px;animation:float 4s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+  h1{font-family:'Shippori Mincho',serif;font-size:clamp(24px,6vw,36px);color:var(--accent);letter-spacing:0.1em;text-shadow:0 0 20px var(--glow);margin-bottom:6px;}
+  .tagline{font-size:13px;color:var(--text-muted);letter-spacing:0.2em;margin-bottom:4px;}
+  .divider{display:flex;align-items:center;gap:12px;margin:24px 0 20px;}
+  .divider-line{flex:1;height:1px;background:var(--border);}
+  .divider-text{font-size:12px;color:var(--text-muted);letter-spacing:0.15em;}
+
+  /* メニューカード */
+  .menu-list{display:flex;flex-direction:column;gap:12px;}
+  .menu-card{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px 20px;
+    text-decoration:none;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    gap:16px;
+    transition:all 0.3s;
+    position:relative;
+    overflow:hidden;
+  }
+  .menu-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg,rgba(232,180,248,0.05) 0%,transparent 60%);
+    opacity:0;
+    transition:opacity 0.3s;
+  }
+  .menu-card:hover{
+    border-color:var(--accent);
+    box-shadow:0 0 20px var(--glow);
+    transform:translateY(-2px);
+  }
+  .menu-card:hover::before{opacity:1;}
+  .menu-card:active{transform:translateY(0);}
+
+  .menu-icon{
+    width:52px;height:52px;
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    flex-shrink:0;
+  }
+  .icon-purple{background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.3);}
+  .icon-blue{background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.25);}
+  .icon-gold{background:rgba(245,215,110,0.15);border:1px solid rgba(245,215,110,0.25);}
+  .icon-green{background:rgba(168,230,207,0.15);border:1px solid rgba(168,230,207,0.25);}
+  .icon-pink{background:rgba(232,180,248,0.15);border:1px solid rgba(232,180,248,0.25);}
+  .icon-orange{background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.25);}
+  .icon-teal{background:rgba(45,212,191,0.15);border:1px solid rgba(45,212,191,0.25);}
+  .icon-red{background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.25);}
+
+  .menu-info{flex:1;}
+  .menu-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;letter-spacing:0.05em;}
+  .menu-desc{font-size:12px;color:var(--text-muted);line-height:1.5;}
+  .menu-arrow{color:var(--border);font-size:18px;flex-shrink:0;}
+  .menu-card:hover .menu-arrow{color:var(--accent);}
+
+  .section-label{font-size:11px;color:var(--text-muted);letter-spacing:0.2em;margin:20px 0 10px 4px;}
+
+  /* バッジ */
+  .badge{
+    position:absolute;top:10px;right:36px;
+    background:linear-gradient(135deg,#8b5cf6,#6d28d9);
+    color:white;font-size:9px;font-weight:700;
+    padding:2px 7px;border-radius:20px;
+    letter-spacing:0.05em;
+  }
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<div class="container">
+  <header>
+    <span class="cat-emoji">🔮</span>
+    <h1>ねこタロット</h1>
+    <p class="tagline">今日、どんな占いをする？</p>
+  </header>
+
+  <p class="section-label">✨ タロット占い</p>
+  <div class="menu-list">
+
+    <a href="/one-oracle.html" class="menu-card">
+      <div class="menu-icon icon-purple">🌟</div>
+      <div class="menu-info">
+        <div class="menu-title">ワンオラクル</div>
+        <div class="menu-desc">今のあなたへ 1枚のメッセージ</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/three-card.html" class="menu-card">
+      <div class="menu-icon icon-blue">🌙</div>
+      <div class="menu-info">
+        <div class="menu-title">スリーカード</div>
+        <div class="menu-desc">過去・現在・未来を読み解く</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/index.html" class="menu-card">
+      <div class="menu-icon icon-gold">⚖️</div>
+      <div class="menu-info">
+        <div class="menu-title">決断のとき</div>
+        <div class="menu-desc">2つの選択肢、どちらを選ぶ？</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/release.html" class="menu-card">
+      <div class="menu-icon icon-green">🍃</div>
+      <div class="menu-info">
+        <div class="menu-title">手放す・引き寄せる</div>
+        <div class="menu-desc">手放すべきものと引き寄せるもの</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/celtic.html" class="menu-card">
+      <div class="menu-icon icon-pink">✨</div>
+      <div class="menu-info">
+        <div class="menu-title">ケルト十字</div>
+        <div class="menu-desc">10枚で深く読み解く本格占い</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+  </div>
+
+  <p class="section-label">🐱 ねこのお告げ</p>
+  <div class="menu-list">
+
+    <a href="/omikuji.html" class="menu-card">
+      <div class="menu-icon icon-orange">🎋</div>
+      <div class="menu-info">
+        <div class="menu-title">今日のおみくじ</div>
+        <div class="menu-desc">今日の運勢を猫が告げるニャ</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/lucky-cat.html" class="menu-card">
+      <div class="menu-icon icon-teal">🐈</div>
+      <div class="menu-info">
+        <div class="menu-title">今日のラッキーキャット</div>
+        <div class="menu-desc">あなたの今日の守り猫は？</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+    <a href="/tora.html" class="menu-card">
+      <div class="menu-icon icon-red">🐱</div>
+      <div class="menu-info">
+        <div class="menu-title">ねこたちの格言</div>
+        <div class="menu-desc">秘密のアドバイスをもらう</div>
+      </div>
+      <span class="menu-arrow">›</span>
+    </a>
+
+  </div>
+</div>
+
+<script>
+function createStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<60;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*2.5+0.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s;`;
+    c.appendChild(s);
+  }
+}
+createStars();
+</script>
+</body>
+</html>
