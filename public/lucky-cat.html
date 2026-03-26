@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -73,6 +74,27 @@
   <button class="btn btn-reset" id="btnReset" onclick="resetAll()" style="display:none">🔄 もう一度召喚する</button>
 </div>
 <script>
+// 猫の画像データ
+const CAT_IMAGES = [
+  {num:1, type:'黒ねこ'},
+{num:2, type:'白ねこ'},
+
+  {num:3, type:'グレー'},
+  {num:4, type:'黒白'},
+  {num:5, type:'グレー白'},
+  {num:6, type:'茶とら'},
+  {num:7, type:'キジトラ'},
+  {num:8, type:'サバトラ'},
+  {num:9, type:'茶白'},
+  {num:10, type:'キジ白'},
+  {num:11, type:'サバ白'},
+  {num:12, type:'三毛猫'},
+  {num:13, type:'サビ猫'},
+  {num:14, type:'黒白とび'},
+  {num:15, type:'ポインテッド'},
+];
+const IMG_BASE = 'https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
+
 async function summonCat(){
   const btnSummon=document.getElementById('btnSummon');
   btnSummon.disabled=true;
@@ -83,15 +105,19 @@ async function summonCat(){
   catCard.classList.add('show');
   catContent.innerHTML=`<div class="loading"><span class="loading-cats">🐱 🐈 😸</span>守り猫を呼んでいるにゃ…</div>`;
 
-  const today=new Date().toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'long'});
-  const prompt=`あなたはねこタロット占い師の「ねこ先生」です。今日（${today}）の守り猫を召喚します。
+  // 今日の日付をシードにして毎日同じ猫が出る
+  const today=new Date();
+  const seed=(today.getFullYear()*10000)+(today.getMonth()*100)+today.getDate();
+  const catData=CAT_IMAGES[seed % CAT_IMAGES.length];
+ 　const imgUrl=IMG_BASE+catData.type+'.png';
+
+  const todayStr=today.toLocaleDateString('ja-JP',{month:'long',day:'numeric',weekday:'long'});
+  const prompt=`あなたはねこタロット占い師の「ねこ先生」です。今日（${todayStr}）の守り猫は「${catData.type}」です。
 
 以下のJSON形式で返してください（JSONのみ）：
 {
-  "cat_emoji": "猫の絵文字（😸🐱🐈🐈‍⬛😻😼😽🙀など）",
   "name": "この猫の名前（ひらがな・カタカナで5文字以内）",
-  "type": "猫の種類や特徴（例：三毛猫の魔法使い、黒猫の守護霊など、15文字以内）",
-  "message": "この猫が今日あなたに伝えたいメッセージ（100文字程度、温かく具体的に）",
+  "message": "この${catData.type}の猫が今日あなたに伝えたいメッセージ（100文字程度、温かく具体的に）",
   "power": "この猫の特別な力（20文字以内）",
   "mission": "今日この猫があなたのそばにいる理由（30文字以内）",
   "lucky_action": "この猫からのアドバイス・行動提案（30文字以内）",
@@ -105,9 +131,10 @@ async function summonCat(){
     const clean=text.replace(/```json|```/g,'').trim();
     const cat=JSON.parse(clean);
     catContent.innerHTML=`
-      <div class="lucky-cat-img">${cat.cat_emoji||'🐱'}</div>
+      <img src="${imgUrl}" alt="${catData.type}" style="width:160px;height:160px;object-fit:contain;margin:8px auto 16px;display:block;animation:bounce2 2s ease-in-out infinite;"
+        onerror="this.outerHTML='<div class=\\'lucky-cat-img\\'>🐱</div>'">
       <div class="cat-name">${cat.name}</div>
-      <div class="cat-type">${cat.type}</div>
+      <div class="cat-type">${catData.type}</div>
       <div class="cat-message">${cat.message}</div>
       <div class="cat-power">
         <div class="power-item"><span class="power-label">✨ 特別な力</span><span class="power-value">${cat.power}</span></div>
