@@ -379,7 +379,7 @@ ${cardInfo}
         ||POSITIONS.some(p=>l.includes(p.label)))&&l.length<60;
       if(isHead){
         if(current)cards.push(current);
-        current={head:l.replace(/^[・①-⑩\d\.\s]+/,'').trim(),body:[]};
+        current={head:l.replace(/^#+\s*/,'').replace(/^[・①-⑩\d\.\s]+/,'').trim(),body:[]};
       } else if(current){
         current.body.push(l);
       }
