@@ -156,7 +156,7 @@ async function getAIReading(){
     if(!text)throw new Error('解釈を取得できませんでした');
     const parts=text.split('総合メッセージ');const cardPart=parts[0].trim();const summaryPart=parts[1]?.trim()||'';
     const lines=cardPart.split('\n');let cards=[],current=null;
-    lines.forEach(line=>{const l=line.trim();if(!l)return;const isHead=(l.startsWith('・')||l.startsWith('過去')||l.startsWith('現在')||l.startsWith('未来')||l.match(/^[①②③]/))&&l.length<40;if(isHead){if(current)cards.push(current);current={head:l.replace(/^[・①②③\d\.\s]+/,'').trim(),body:[]};}else if(current)current.body.push(l);});
+    lines.forEach(line=>{const l=line.trim().replace(/^#+\s*/,'');if(!l)return;const isHead=(l.startsWith('・')||l.startsWith('過去')||l.startsWith('現在')||l.startsWith('未来')||l.match(/^[①②③]/))&&l.length<40;if(isHead){if(current)cards.push(current);current={head:l.replace(/^[・①②③\d\.\s]+/,'').trim(),body:[]};}else if(current)current.body.push(l);});
     if(current)cards.push(current);
     let cardHTML=cards.length>0?cards.map(c=>`<div class="card-section"><h4>${c.head}</h4><p>${c.body.join('<br>')}</p></div>`).join(''):`<div class="card-section"><p>${cardPart.replace(/\n/g,'<br>')}</p></div>`;
     aiReading.innerHTML=cardHTML+(summaryPart?`<div class="summary"><h4>🐱 総合メッセージ</h4><p>${summaryPart.replace(/\n/g,'<br>')}</p></div>`:'');
