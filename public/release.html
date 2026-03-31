@@ -163,7 +163,7 @@ async function getAIReading(){
 「手放すもの：カード名」と「引き寄せるもの：カード名」の見出しでそれぞれ3文ずつ解釈し、最後に「ねこ先生のアドバイス」として3〜4文でまとめ、「ねこ先生からひとこと」で締めてください。`;
   try{
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();const text=data.content?.[0]?.text||'';
+    const data=await res.json();const text=(data.content?.[0]?.text||'').replace(/^#+\s*/gm,'');
     if(!text)throw new Error('解釈を取得できませんでした');
     const parts=text.split('ねこ先生のアドバイス');
     const cardPart=parts[0].trim();const summaryPart=parts[1]?.trim()||'';
