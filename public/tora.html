@@ -115,7 +115,7 @@ async function askTora(){
 }`;
 
   try{
-    const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
     const clean=text.replace(/```json|```/g,'').trim();
