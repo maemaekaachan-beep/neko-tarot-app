@@ -120,6 +120,11 @@
 <script>
 const TODAY=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/\n/g,'<br>');
+}
+
+
 async function drawOmikuji(){
   const tube=document.querySelector('.mikuji-tube');
   tube.style.pointerEvents='none';
@@ -154,25 +159,27 @@ async function drawOmikuji(){
 
   try{
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:500,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'';
-    const clean=text.replace(/```json|```/g,'').trim();
-    const result=JSON.parse(clean);
-    const rankClass={'大吉':'daikichi','吉':'kichi','中吉':'chukichi','小吉':'shokichi','末吉':'shokichi','凶':'kyo'}[result.rank]||'kichi';
-    resultContent.innerHTML=`
-      <div class="fortune-rank ${rankClass}">${result.rank}</div>
-      <div class="cat-image">${result.cat_emoji||'🐱'}</div>
-      <p class="fortune-text">${result.message}</p>
-      <div class="fortune-items">
-        <div class="fortune-item"><div class="fortune-item-label">💕 恋愛運</div><div class="fortune-item-value">${result.love}</div></div>
-        <div class="fortune-item"><div class="fortune-item-label">💼 仕事運</div><div class="fortune-item-value">${result.work}</div></div>
-        <div class="fortune-item"><div class="fortune-item-label">💰 金運</div><div class="fortune-item-value">${result.money}</div></div>
-        <div class="fortune-item"><div class="fortune-item-label">🌿 健康運</div><div class="fortune-item-value">${result.health}</div></div>
-        <div class="fortune-item"><div class="fortune-item-label">🍀 ラッキーアイテム</div><div class="fortune-item-value">${result.lucky_item}</div></div>
-        <div class="fortune-item"><div class="fortune-item-label">🎨 ラッキーカラー</div><div class="fortune-item-value">${result.lucky_color}</div></div>
-      </div>
-      <p style="margin-top:16px;font-size:13px;color:var(--accent);font-style:italic;text-align:center">🐱 ${result.advice}</p>
-    `;
+    
+  const data=await res.json();
+const text=data.content?.[0]?.text||'';
+const clean=text.replace(/```json|```/g,'').trim();
+const result=JSON.parse(clean);
+const rankClass={'大吉':'daikichi','吉':'kichi','中吉':'chukichi','小吉':'shokichi','末吉':'shokichi','凶':'kyo'}[result.rank]||'kichi';
+resultContent.innerHTML=`
+  <div class="fortune-rank ${rankClass}">${result.rank}</div>
+  <div class="cat-image">${result.cat_emoji||'🐱'}</div>
+  <p class="fortune-text">${formatReading(result.message)}</p>
+  <div class="fortune-items">
+    <div class="fortune-item"><div class="fortune-item-label">💕 恋愛運</div><div class="fortune-item-value">${formatReading(result.love)}</div></div>
+    <div class="fortune-item"><div class="fortune-item-label">💼 仕事運</div><div class="fortune-item-value">${formatReading(result.work)}</div></div>
+    <div class="fortune-item"><div class="fortune-item-label">💰 金運</div><div class="fortune-item-value">${formatReading(result.money)}</div></div>
+    <div class="fortune-item"><div class="fortune-item-label">🌿 健康運</div><div class="fortune-item-value">${formatReading(result.health)}</div></div>
+    <div class="fortune-item"><div class="fortune-item-label">🍀 ラッキーアイテム</div><div class="fortune-item-value">${formatReading(result.lucky_item)}</div></div>
+    <div class="fortune-item"><div class="fortune-item-label">🎨 ラッキーカラー</div><div class="fortune-item-value">${formatReading(result.lucky_color)}</div></div>
+  </div>
+  <p style="margin-top:16px;font-size:13px;color:var(--accent);font-style:italic;text-align:center">🐱 ${formatReading(result.advice)}</p>
+`;
+    
     document.getElementById('btnReset').style.display='flex';
   }catch(err){
     resultCard.classList.remove('show');
