@@ -374,16 +374,13 @@ ${cardInfo}
         current.body.push(l);
       }
     });
-    if(current) cards.push(current);
-
-   let cardHTML = cards.length > 0
+    let cardHTML = cards.length > 0
         ? cards.map(c => `<div class="card-section"><h4>${c.head}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join('')
         : `<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
 
       aiReading.innerHTML = cardHTML + (summaryPart
         ? `<div class="summary"><h4>😺 ねこ先生の結論</h4><p>${formatReading(summaryPart)}</p></div>`
         : '');
-
   } catch(err){
     aiResult.classList.remove('show');
     errorMsg.textContent = `エラーが発生しましたにゃ…: ${err.message}`;
