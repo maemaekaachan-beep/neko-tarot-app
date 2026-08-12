@@ -317,7 +317,9 @@ function revealAll(){
   for(let i=0;i<10;i++) setTimeout(()=>revealCard(i),i*150);
   document.getElementById('btnRevealAll').disabled = true;
 }
-
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+}
 async function getAIReading(){
   const question = document.getElementById('questionInput').value.trim();
   const btnAI = document.getElementById('btnAI');
@@ -387,12 +389,11 @@ ${cardInfo}
     if(current)cards.push(current);
 
     let cardHTML = cards.length>0
-      ?cards.map(c=>`<div class="card-section"><h4>${c.head}</h4><p>${c.body.join('<br>')}</p></div>`).join('')
-      :`<div class="card-section"><p>${cardPart.replace(/\n/g,'<br>')}</p></div>`;
+  ?cards.map(c=>`<div class="card-section"><h4>${c.head}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join('')
+  :`<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
 
-    aiReading.innerHTML = cardHTML+(summaryPart
-      ?`<div class="summary"><h4>🐱 総合メッセージ</h4><p>${summaryPart.replace(/\n/g,'<br>')}</p></div>`:'');
-
+aiReading.innerHTML = cardHTML+(summaryPart
+  ?`<div class="summary"><h4>🐱 総合メッセージ</h4><p>${formatReading(summaryPart)}</p></div>`:'');
   } catch(err){
     aiResult.classList.remove('show');
     errorMsg.textContent = `エラーが発生しましたにゃ…: ${err.message}`;
