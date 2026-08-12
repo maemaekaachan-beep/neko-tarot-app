@@ -92,7 +92,7 @@
 </div>
 <script>
 function formatReading(text){
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/\n/g, '<br>');
 }async function askTora(){
   const btnAsk=document.getElementById('btnAsk');
   btnAsk.disabled=true;
