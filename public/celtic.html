@@ -318,7 +318,7 @@ function revealAll(){
   document.getElementById('btnRevealAll').disabled = true;
 }
 function formatReading(text){
- return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/\n/g, '<br>');
+return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/^---+\s*$/gm,'').replace(/\n/g, '<br>');
 }
 async function getAIReading(){
   const question = document.getElementById('questionInput').value.trim();
