@@ -91,7 +91,9 @@
   <button class="btn btn-reset" id="btnReset" onclick="resetAll()" style="display:none">🔄 もう一度聞く</button>
 </div>
 <script>
-async function askTora(){
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+}async function askTora(){
   const btnAsk=document.getElementById('btnAsk');
   btnAsk.disabled=true;
   const resultCard=document.getElementById('resultCard');
@@ -118,21 +120,20 @@ async function askTora(){
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
-    const clean=text.replace(/```json|```/g,'').trim();
-    const tora=JSON.parse(clean);
     toraContent.innerHTML=`
-      <div class="tora-big">🐱</div>
-      <div class="kotowaza">「${tora.kotowaza}」</div>
-      <p class="explanation">${tora.explanation}</p>
-      <div class="tora-advice">
-        <strong>🐾 今日の行動</strong>
-        ${tora.action}
-      </div>
-      <div class="tora-advice" style="margin-top:10px;background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3)">
-        <strong style="color:rgba(196,181,253,0.8)">🌙 秘密のひとこと</strong>
-        <span style="color:var(--accent)">${tora.secret}</span>
-      </div>
-    `;
+        <div class="tora-big">🐱</div>
+        <div class="kotowaza">「${formatReading(tora.kotowaza)}」</div>
+        <p class="explanation">${formatReading(tora.explanation)}</p>
+        <div class="tora-advice">
+          <strong>🐾 今日の行動</strong>
+          ${formatReading(tora.action)}
+        </div>
+        <div class="tora-advice" style="margin-top:10px;background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3)">
+          <strong style="color:rgba(196,181,253,0.8)">🌙 秘密のひとこと</strong>
+          <span style="color:var(--accent)">${formatReading(tora.secret)}</span>
+        </div>
+      `;
+   
     document.getElementById('btnReset').style.display='flex';
   }catch(err){
     resultCard.classList.remove('show');
