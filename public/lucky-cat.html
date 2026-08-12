@@ -95,7 +95,7 @@ const CAT_IMAGES = [
 ];
 const IMG_BASE = 'https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
 function formatReading(text){
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/\n/g,'<br>');
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/^---+\s*$/gm,'').replace(/\n/g,'<br>');
 }
 async function summonCat(){
   const btnSummon=document.getElementById('btnSummon');
