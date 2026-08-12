@@ -94,7 +94,9 @@ const CAT_IMAGES = [
   {num:15, type:'ポインテッド'},
 ];
 const IMG_BASE = 'https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
-
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/\n/g,'<br>');
+}
 async function summonCat(){
   const btnSummon=document.getElementById('btnSummon');
   btnSummon.disabled=true;
@@ -135,13 +137,13 @@ async function summonCat(){
         onerror="this.outerHTML='<div class=\\'lucky-cat-img\\'>🐱</div>'">
       <div class="cat-name">${cat.name}</div>
       <div class="cat-type">${catData.type}</div>
-      <div class="cat-message">${cat.message}</div>
-      <div class="cat-power">
-        <div class="power-item"><span class="power-label">✨ 特別な力</span><span class="power-value">${cat.power}</span></div>
-        <div class="power-item"><span class="power-label">🎯 今日の使命</span><span class="power-value">${cat.mission}</span></div>
-        <div class="power-item"><span class="power-label">🍀 行動提案</span><span class="power-value">${cat.lucky_action}</span></div>
-      </div>
-      <p class="cat-advice">🐱 ${cat.advice}</p>
+    　<div class="cat-message">${formatReading(cat.message)}</div>
+  <div class="cat-power">
+    <div class="power-item"><span class="power-label">✨ 特別な力</span><span class="power-value">${formatReading(cat.power)}</span></div>
+    <div class="power-item"><span class="power-label">🎯 今日の使命</span><span class="power-value">${formatReading(cat.mission)}</span></div>
+    <div class="power-item"><span class="power-label">🍀 行動提案</span><span class="power-value">${formatReading(cat.lucky_action)}</span></div>
+  </div>
+  <p class="cat-advice">🐱 ${formatReading(cat.advice)}</p>
     `;
     document.getElementById('btnReset').style.display='flex';
   }catch(err){
