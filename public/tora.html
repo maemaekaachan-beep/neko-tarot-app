@@ -92,8 +92,9 @@
 </div>
 <script>
 function formatReading(text){
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/\n/g, '<br>');
-}async function askTora(){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'').replace(/^#{1,6}\s*/gm,'').replace(/\n/g, '<br>');
+}
+  async function askTora(){
   const btnAsk=document.getElementById('btnAsk');
   btnAsk.disabled=true;
   const resultCard=document.getElementById('resultCard');
