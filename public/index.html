@@ -375,7 +375,7 @@ ${cardInfo}
       }
     });
     let cardHTML = cards.length > 0
-        ? cards.map(c => `<div class="card-section"><h4>${c.head}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join('')
+        ? cards.map(c => `<div class="card-section"><h4>${formatReading(c.head)}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join('')
         : `<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
 
       aiReading.innerHTML = cardHTML + (summaryPart
