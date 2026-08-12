@@ -148,7 +148,9 @@ function revealAll(){
   revealCard(0);setTimeout(()=>revealCard(1),200);
   document.getElementById('btnRevealAll').disabled=true;
 }
-
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+}
 async function getAIReading(){
   const question=document.getElementById('questionInput').value.trim();
   const btnAI=document.getElementById('btnAI');const aiResult=document.getElementById('aiResult');const aiReading=document.getElementById('aiReading');const errorMsg=document.getElementById('errorMsg');
@@ -168,10 +170,9 @@ async function getAIReading(){
     const parts=text.split('ねこ先生のアドバイス');
     const cardPart=parts[0].trim();const summaryPart=parts[1]?.trim()||'';
     const lines=cardPart.split('\n');let cards=[],current=null;
-    lines.forEach(line=>{const l=line.trim();if(!l)return;const isHead=(l.startsWith('手放す')||l.startsWith('引き寄せ')||l.startsWith('・'))&&l.length<50;if(isHead){if(current)cards.push(current);current={head:l.replace(/^[・]/,'').trim(),type:l.includes('手放す')?'release':'attract',body:[]};}else if(current)current.body.push(l);});
-    if(current)cards.push(current);
-    let cardHTML=cards.length>0?cards.map(c=>`<div class="card-section ${c.type}"><h4>${c.head}</h4><p>${c.body.join('<br>')}</p></div>`).join(''):`<div class="card-section"><p>${cardPart.replace(/\n/g,'<br>')}</p></div>`;
-    aiReading.innerHTML=cardHTML+(summaryPart?`<div class="summary"><h4>🐱 ねこ先生のアドバイス</h4><p>${summaryPart.replace(/\n/g,'<br>')}</p></div>`:'');
+    let cardHTML=cards.length>0?cards.map(c=>`<div class="card-section ${c.type}"><h4>${c.head}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join(''):`<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
+aiReading.innerHTML=cardHTML+(summaryPart?`<div class="summary"><h4>🐱 ねこ先生のアドバイス</h4><p>${formatReading(summaryPart)}</p></div>`:'');
+   
   }catch(err){aiResult.classList.remove('show');errorMsg.textContent=`エラーが発生しましたにゃ…: ${err.message}`;errorMsg.classList.add('show');}
   btnAI.disabled=false;
 }
