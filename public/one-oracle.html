@@ -135,7 +135,9 @@ function revealCard(){
   `;
   document.getElementById('btnAI').disabled=false;
 }
-
+function formatReading(text){
+  return text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+}
 async function getAIReading(){
   const question=document.getElementById('questionInput').value.trim();
   const btnAI=document.getElementById('btnAI');
@@ -161,9 +163,9 @@ ${question||'（入力なし：今のあなたへのメッセージをお願い�
     const text=data.content?.[0]?.text||'';
     if(!text)throw new Error(data.error?.message||'解釈を取得できませんでした');
     const parts=text.split('ねこ先生からひとこと');
-    const main=parts[0].trim();
-    const oneword=parts[1]?.trim()||'';
-    aiReading.innerHTML=`<p style="line-height:1.9">${main.replace(/\n/g,'<br>')}</p>${oneword?`<div class="summary"><h4>🐱 ねこ先生からひとこと</h4><p>${oneword.replace(/^[：:]\s*/,'')}</p></div>`:''}`;
+    const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>${oneword?`<div class="summary"><h4>🐱 ねこ先生からひとこと</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
+    
+    
   }catch(err){
     aiResult.classList.remove('show');
     errorMsg.textContent=`エラーが発生しましたにゃ…: ${err.message}`;
