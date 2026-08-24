@@ -64,6 +64,7 @@
   .error-msg{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);border-radius:10px;padding:11px 14px;color:#fca5a5;font-size:13px;margin-top:8px;display:none;}
   .error-msg.show{display:block;}
 </style>
+<script src="/deck-config.js"></script>
 </head>
 <body>
 <div class="stars" id="stars"></div>
@@ -92,25 +93,27 @@
     </div>
   </div>
 
-  <button class="btn btn-ai" id="btnAI" onclick="getAIReading()" disabled>✨ ねこ先生に解釈してもらう</button>
+  <button class="btn btn-ai" id="btnAI" onclick="getAIReading()" disabled>✨ <span data-deck-narrator>ねこ先生</span>に解釈してもらう</button>
   <div class="error-msg" id="errorMsg"></div>
   <div class="ai-result" id="aiResult">
-    <div class="ai-result-header"><span>🐱</span><h3>ねこ先生のお告げ</h3></div>
+    <div class="ai-result-header"><span data-deck-emoji>🐱</span><h3><span data-deck-narrator>ねこ先生</span>のお告げ</h3></div>
     <div class="ai-reading" id="aiReading"></div>
   </div>
   <button class="btn btn-reset" onclick="resetAll()">🔄 最初からやり直す</button>
 </div>
 
 <script>
-const BASE='https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
+const DECK=getCurrentDeck();
+const BASE=DECK.base;
+const EXT=DECK.ext;
 const MAJOR_FILES=['愚者','魔術師','女教皇','女帝','皇帝','法王','恋人たち','戦車','力','隠者','運命の輪','正義','吊された男','死神','節制','悪魔','塔','星','月','太陽','審判','世界'];
 const MAJOR_DISPLAY=['愚者','魔術師','女教皇','女帝','皇帝','法王','恋人たち','戦車','力','隠者','運命の輪','正義','吊るされた男','死神','節制','悪魔','塔','星','月','太陽','審判','世界'];
 const SUITS=[{prefix:'ワンド',name:'ワンド'},{prefix:'カップ',name:'カップ'},{prefix:'ソード',name:'ソード'},{prefix:'ペンタクル',name:'ペンタクル'}];
 const MINOR_RANKS=['A','2','3','4','5','6','7','8','9','10','ペイジ','ナイト','クイーン','キング'];
 const MINOR_NAMES=['エース','2','3','4','5','6','7','8','9','10','ペイジ','ナイト','クイーン','キング'];
 const CARDS=[];
-MAJOR_FILES.forEach((f,i)=>CARDS.push({name:MAJOR_DISPLAY[i],img:BASE+encodeURIComponent(f+'.jpg')}));
-SUITS.forEach(suit=>MINOR_RANKS.forEach((rank,ri)=>CARDS.push({name:`${suit.name}の${MINOR_NAMES[ri]}`,img:BASE+encodeURIComponent(`${suit.prefix}の${rank}.jpg`)})));
+MAJOR_FILES.forEach((f,i)=>CARDS.push({name:MAJOR_DISPLAY[i],img:BASE+encodeURIComponent(f+'.'+EXT)}));
+SUITS.forEach(suit=>MINOR_RANKS.forEach((rank,ri)=>CARDS.push({name:`${suit.name}の${MINOR_NAMES[ri]}`,img:BASE+encodeURIComponent(`${suit.prefix}の${rank}.${EXT}`)})));
 
 let drawnCard=null;
 
@@ -131,7 +134,7 @@ function revealCard(){
     ${drawnCard.reversed?'<div class="reversed-badge">逆位置</div>':''}
     <div class="card-name-overlay">${drawnCard.name}${drawnCard.reversed?'（逆）':''}</div>
     <img class="card-img" src="${drawnCard.img}" alt="${drawnCard.name}"
-      onerror="this.outerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;flex-direction:column;gap:8px\\'><span>🐱</span><span style=\\'font-size:11px;color:var(--accent2);text-align:center;padding:0 8px\\'>${nameEscaped}</span></div>'">
+      onerror="this.outerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;flex-direction:column;gap:8px\\'><span>${DECK.emoji}</span><span style=\\'font-size:11px;color:var(--accent2);text-align:center;padding:0 8px\\'>${nameEscaped}</span></div>'">
   `;
   document.getElementById('btnAI').disabled=false;
 }
@@ -147,8 +150,8 @@ async function getAIReading(){
   errorMsg.classList.remove('show');
   btnAI.disabled=true;
   aiResult.classList.add('show');
-  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">🐱 🔮 🌙</span>ねこ先生が読んでいるにゃ…</div>`;
-  const prompt=`あなたはねこタロット占い師の「ねこ先生」です。わかりやすく具体的で、時々ねこっぽい表現（「〜にゃ」など）を自然に使います。温かく、でも的確なアドバイスをしてください。
+  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${DECK.emoji} 🔮 🌙</span>${DECK.narrator}が読んでいる${DECK.loadingSuffix}</div>`;
+  const prompt=`あなたは${DECK.label}占い師の「${DECK.narrator}」です。${DECK.styleInstruction}
 
 【ご質問・今の気持ち】
 ${question||'（入力なし：今のあなたへのメッセージをお願いします）'}
@@ -156,18 +159,18 @@ ${question||'（入力なし：今のあなたへのメッセージをお願い�
 【引いたカード】
 【${drawnCard.name}${drawnCard.reversed?'（逆位置）':''}】
 
-このカードが今のあなたに伝えたいメッセージを、200〜250文字程度で温かく具体的に伝えてください。最後に「ねこ先生からひとこと」として短い一言を添えてください。`;
+このカードが今のあなたに伝えたいメッセージを、200〜250文字程度で温かく具体的に伝えてください。最後に「${DECK.narrator}からひとこと」として短い一言を添えてください。`;
   try{
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
     if(!text)throw new Error(data.error?.message||'解釈を取得できませんでした');
-    const parts=text.split('ねこ先生からひとこと');
-   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>${oneword?`<div class="summary"><h4>🐱 ねこ先生からひとこと</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
+    const parts=text.split(`${DECK.narrator}からひとこと`);
+   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>${oneword?`<div class="summary"><h4>${DECK.emoji} ${DECK.narrator}からひとこと</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
     
   }catch(err){
     aiResult.classList.remove('show');
-    errorMsg.textContent=`エラーが発生しましたにゃ…: ${err.message}`;
+    errorMsg.textContent=`エラーが発生しました${DECK.errorSuffix}: ${err.message}`;
     errorMsg.classList.add('show');
   }
   btnAI.disabled=false;
@@ -190,6 +193,7 @@ function createStars(){
   for(let i=0;i<60;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+0.5;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;animation-delay:${(Math.random()*4).toFixed(1)}s;`;c.appendChild(s);}
 }
 createStars();
+applyDeckUITexts(DECK);
 drawCard();
 </script>
 </body>
