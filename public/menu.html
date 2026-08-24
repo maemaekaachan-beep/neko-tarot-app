@@ -88,6 +88,15 @@
 
   .section-label{font-size:11px;color:var(--text-muted);letter-spacing:0.2em;margin:20px 0 10px 4px;}
 
+  /* デッキ切り替え */
+  .deck-switcher{display:flex;gap:10px;margin-bottom:8px;}
+  .deck-option{flex:1;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;transition:all 0.25s;}
+  .deck-option:hover{border-color:var(--accent);}
+  .deck-option.active{border-color:var(--accent);box-shadow:0 0 16px var(--glow);background:rgba(232,180,248,0.08);}
+  .deck-option-emoji{font-size:28px;display:block;margin-bottom:6px;}
+  .deck-option-label{font-size:13px;font-weight:700;color:var(--text);}
+  .deck-option-desc{font-size:10px;color:var(--text-muted);margin-top:2px;}
+
   /* バッジ */
   .badge{
     position:absolute;top:10px;right:36px;
@@ -97,6 +106,7 @@
     letter-spacing:0.05em;
   }
 </style>
+<script src="/deck-config.js"></script>
 </head>
 <body>
 <div class="stars" id="stars"></div>
@@ -106,6 +116,20 @@
     <h1>ねこタロット</h1>
     <p class="tagline">今日、どんな占いをする？</p>
   </header>
+
+  <p class="section-label">🔀 デッキを選ぶ</p>
+  <div class="deck-switcher" id="deckSwitcher">
+    <div class="deck-option" id="deckOptionCat" onclick="selectDeck('cat')">
+      <span class="deck-option-emoji">🐱</span>
+      <div class="deck-option-label">ねこタロット</div>
+      <div class="deck-option-desc">ねこ先生と占う</div>
+    </div>
+    <div class="deck-option" id="deckOptionAnimal" onclick="selectDeck('animal')">
+      <span class="deck-option-emoji">🦉</span>
+      <div class="deck-option-label">動物タロット</div>
+      <div class="deck-option-desc">ミネルヴァと占う</div>
+    </div>
+  </div>
 
   <p class="section-label">✨ タロット占い</p>
   <div class="menu-list">
@@ -202,6 +226,16 @@ function createStars(){
   }
 }
 createStars();
+
+function selectDeck(key){
+  setCurrentDeck(key);
+  updateDeckSwitcherUI(key);
+}
+function updateDeckSwitcherUI(key){
+  document.getElementById('deckOptionCat').classList.toggle('active', key==='cat');
+  document.getElementById('deckOptionAnimal').classList.toggle('active', key==='animal');
+}
+updateDeckSwitcherUI(getCurrentDeck().key);
 </script>
 </body>
 </html>
