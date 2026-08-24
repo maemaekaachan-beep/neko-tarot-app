@@ -133,6 +133,7 @@ a<!DOCTYPE html>
   .spread-info{background:rgba(232,180,248,0.06);border:1px solid rgba(232,180,248,0.2);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--text-muted);line-height:1.8;}
   .spread-info strong{color:var(--accent2);}
 </style>
+<script src="/deck-config.js"></script>
 </head>
 <body>
 <div class="stars" id="stars"></div>
@@ -163,18 +164,20 @@ a<!DOCTYPE html>
     <div class="celtic-grid" id="cardsGrid"></div>
   </div>
 
-  <button class="btn btn-reveal" id="btnRevealAll" onclick="revealAll()">🐱 すべてのカードをめくる</button>
-  <button class="btn btn-ai" id="btnAI" onclick="getAIReading()" disabled>✨ ねこ先生に解釈してもらう</button>
+  <button class="btn btn-reveal" id="btnRevealAll" onclick="revealAll()"><span data-deck-emoji>🐱</span> すべてのカードをめくる</button>
+  <button class="btn btn-ai" id="btnAI" onclick="getAIReading()" disabled>✨ <span data-deck-narrator>ねこ先生</span>に解釈してもらう</button>
   <div class="error-msg" id="errorMsg"></div>
   <div class="ai-result" id="aiResult">
-    <div class="ai-result-header"><span>🐱</span><h3>ねこ先生のお告げ</h3></div>
+    <div class="ai-result-header"><span data-deck-emoji>🐱</span><h3><span data-deck-narrator>ねこ先生</span>のお告げ</h3></div>
     <div class="ai-reading" id="aiReading"></div>
   </div>
   <button class="btn btn-reset" onclick="resetAll()">🔄 最初からやり直す</button>
 </div>
 
 <script>
-const BASE = 'https://raw.githubusercontent.com/maemaekaachan-beep/cat-tarot-images/main/';
+const DECK = getCurrentDeck();
+const BASE = DECK.base;
+const EXT = DECK.ext;
 
 const MAJOR_FILES = [
   '愚者','魔術師','女教皇','女帝','皇帝','法王','恋人たち','戦車',
@@ -197,11 +200,11 @@ const MINOR_NAMES = ['エース','2','3','4','5','6','7','8','9','10','ペイジ
 
 const CARDS = [];
 MAJOR_FILES.forEach((f,i)=>{
-  CARDS.push({name:MAJOR_DISPLAY[i],img:BASE+encodeURIComponent(f+'.jpg')});
+  CARDS.push({name:MAJOR_DISPLAY[i],img:BASE+encodeURIComponent(f+'.'+EXT)});
 });
 SUITS.forEach(suit=>{
   MINOR_RANKS.forEach((rank,ri)=>{
-    CARDS.push({name:`${suit.name}の${MINOR_NAMES[ri]}`,img:BASE+encodeURIComponent(`${suit.prefix}の${rank}.jpg`)});
+    CARDS.push({name:`${suit.name}の${MINOR_NAMES[ri]}`,img:BASE+encodeURIComponent(`${suit.prefix}の${rank}.${EXT}`)});
   });
 });
 
@@ -299,7 +302,7 @@ function revealCard(index){
       ${card.name}${card.reversed&&!isCross?'（逆）':''}
     </div>
     <img class="card-img" src="${card.img}" alt="${card.name}"
-      onerror="this.outerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:20px;flex-direction:column;gap:4px\\'><span>🐱</span><span style=\\'font-size:8px;color:var(--accent2);text-align:center;padding:0 4px\\'>${nameEscaped}</span></div>'">
+      onerror="this.outerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:20px;flex-direction:column;gap:4px\\'><span>${DECK.emoji}</span><span style=\\'font-size:8px;color:var(--accent2);text-align:center;padding:0 4px\\'>${nameEscaped}</span></div>'">
     <div class="position-label">
       <span class="position-number">No.${index+1}</span>
       ${pos.label}
@@ -330,14 +333,14 @@ async function getAIReading(){
   errorMsg.classList.remove('show');
   btnAI.disabled = true;
   aiResult.classList.add('show');
-  aiReading.innerHTML = `<div class="loading"><span class="loading-cats">🐱 🔮 🌙</span>ねこ先生が星を読んでいるにゃ…</div>`;
+  aiReading.innerHTML = `<div class="loading"><span class="loading-cats">${DECK.emoji} 🔮 🌙</span>${DECK.narrator}が星を読んでいる${DECK.loadingSuffix}</div>`;
 
   const cardInfo = drawnCards.map((card,i)=>
     `・${POSITIONS[i].label}：【${card.name}${card.reversed&&i!==1?'（逆位置）':''}】`
   ).join('\n');
 
-  const prompt = `あなたはねこタロット占い師の「ねこ先生」です。
-わかりやすく具体的で、時々ねこっぽい表現（「〜にゃ」など）を自然に使います。
+  const prompt = `あなたは${DECK.label}占い師の「${DECK.narrator}」です。
+${DECK.styleInstruction}
 温かく、でも的確なアドバイスをしてください。
 
 【ご質問】
@@ -351,8 +354,8 @@ ${cardInfo}
 ---カード別の解釈---
 各カード（10枚）について「ポジション名：カード名」を見出しにして、2文で具体的に解釈。逆位置はその意味も加味。
 
----ねこ先生の総合メッセージ---
-全体を通じた見通しを3〜4文でまとめ、最後に「ねこ先生からひとこと」として一言添えてください。`;
+---${DECK.narrator}の総合メッセージ---
+全体を通じた見通しを3〜4文でまとめ、最後に「${DECK.narrator}からひとこと」として一言添えてください。`;
 
   try {
     const res = await fetch('/api/reading',{
@@ -368,7 +371,7 @@ ${cardInfo}
     const text = data.content?.[0]?.text||'';
     if(!text) throw new Error('解釈を取得できませんでした');
 
-    const parts = text.split('---ねこ先生の総合メッセージ---');
+    const parts = text.split(`---${DECK.narrator}の総合メッセージ---`);
     const cardPart = parts[0].replace('---カード別の解釈---','').trim();
     const summaryPart = parts[1]?.trim()||'';
 
@@ -393,10 +396,10 @@ ${cardInfo}
   :`<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
 
 aiReading.innerHTML = cardHTML+(summaryPart
-  ?`<div class="summary"><h4>🐱 総合メッセージ</h4><p>${formatReading(summaryPart)}</p></div>`:'');
+  ?`<div class="summary"><h4>${DECK.emoji} 総合メッセージ</h4><p>${formatReading(summaryPart)}</p></div>`:'');
   } catch(err){
     aiResult.classList.remove('show');
-    errorMsg.textContent = `エラーが発生しましたにゃ…: ${err.message}`;
+    errorMsg.textContent = `エラーが発生しました${DECK.errorSuffix}: ${err.message}`;
     errorMsg.classList.add('show');
   }
   btnAI.disabled = false;
@@ -424,6 +427,7 @@ function createStars(){
 }
 
 createStars();
+applyDeckUITexts(DECK);
 drawCards();
 renderGrid();
 </script>
