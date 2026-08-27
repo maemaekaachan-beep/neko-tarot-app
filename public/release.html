@@ -157,6 +157,9 @@ function formatReading(text){
 async function getAIReading(){
   const question=document.getElementById('questionInput').value.trim();
   const N=getNarratorForCard(DECK,drawnCards[1].name); // 「引き寄せるもの」のカードの霊獣を語り部にする
+  const cardInfo=drawnCards.map((card,i)=>`・${POSITIONS[i].label}：【${card.name}${card.reversed?'（逆位置）':''}】`).join('\n');
+  document.querySelectorAll('[data-deck-narrator]').forEach(el=>el.textContent=N.name);
+  document.querySelectorAll('[data-deck-emoji]').forEach(el=>el.textContent=N.emoji);
   const btnAI=document.getElementById('btnAI');const aiResult=document.getElementById('aiResult');const aiReading=document.getElementById('aiReading');const errorMsg=document.getElementById('errorMsg');
   errorMsg.classList.remove('show');btnAI.disabled=true;aiResult.classList.add('show');
   aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${N.emoji} 🔮 🌙</span>${N.name}が星を読んでいる${N.loadingSuffix}</div>`;
