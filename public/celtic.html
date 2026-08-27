@@ -325,6 +325,7 @@ return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'')
 }
 async function getAIReading(){
   const question = document.getElementById('questionInput').value.trim();
+  const N = getNarratorForCard(DECK, drawnCards[0].name); // 「現在の状況」のカードの霊獣を語り部にする
   const btnAI = document.getElementById('btnAI');
   const aiResult = document.getElementById('aiResult');
   const aiReading = document.getElementById('aiReading');
@@ -333,16 +334,15 @@ async function getAIReading(){
   errorMsg.classList.remove('show');
   btnAI.disabled = true;
   aiResult.classList.add('show');
-  aiReading.innerHTML = `<div class="loading"><span class="loading-cats">${DECK.emoji} 🔮 🌙</span>${DECK.narrator}が星を読んでいる${DECK.loadingSuffix}</div>`;
+  aiReading.innerHTML = `<div class="loading"><span class="loading-cats">${N.emoji} 🔮 🌙</span>${N.name}が星を読んでいる${N.loadingSuffix}</div>`;
 
   const cardInfo = drawnCards.map((card,i)=>
     `・${POSITIONS[i].label}：【${card.name}${card.reversed&&i!==1?'（逆位置）':''}】`
   ).join('\n');
 
-  const prompt = `あなたは${DECK.label}占い師の「${DECK.narrator}」です。
-${DECK.styleInstruction}
+  const prompt = `あなたは${DECK.label}占い師の「${N.name}」です。
+${N.styleInstruction}
 温かく、でも的確なアドバイスをしてください。
-
 【ご質問】
 ${question||'（質問なし：総合的な状況をみてください）'}
 
@@ -354,9 +354,8 @@ ${cardInfo}
 ---カード別の解釈---
 各カード（10枚）について「ポジション名：カード名」を見出しにして、2文で具体的に解釈。逆位置はその意味も加味。
 
----${DECK.narrator}の総合メッセージ---
-全体を通じた見通しを3〜4文でまとめ、最後に「${DECK.narrator}からひとこと」として一言添えてください。`;
-
+---${N.name}の総合メッセージ---
+全体を通じた見通しを3〜4文でまとめ、最後に「${N.name}からひとこと」として一言添えてください。`;
   try {
     const res = await fetch('/api/reading',{
       method:'POST',
@@ -371,7 +370,7 @@ ${cardInfo}
     const text = data.content?.[0]?.text||'';
     if(!text) throw new Error('解釈を取得できませんでした');
 
-    const parts = text.split(`---${DECK.narrator}の総合メッセージ---`);
+    const parts = text.split(`---${N.name}の総合メッセージ---`);
     const cardPart = parts[0].replace('---カード別の解釈---','').trim();
     const summaryPart = parts[1]?.trim()||'';
 
@@ -396,10 +395,10 @@ ${cardInfo}
   :`<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
 
 aiReading.innerHTML = cardHTML+(summaryPart
-  ?`<div class="summary"><h4>${DECK.emoji} 総合メッセージ</h4><p>${formatReading(summaryPart)}</p></div>`:'');
+  ?`<div class="summary"><h4>${N.emoji} 総合メッセージ</h4><p>${formatReading(summaryPart)}</p></div>`:'');
   } catch(err){
     aiResult.classList.remove('show');
-    errorMsg.textContent = `エラーが発生しました${DECK.errorSuffix}: ${err.message}`;
+    errorMsg.textContent = `エラーが発生しました${N.errorSuffix}: ${err.message}`;
     errorMsg.classList.add('show');
   }
   btnAI.disabled = false;
