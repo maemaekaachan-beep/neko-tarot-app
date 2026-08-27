@@ -326,6 +326,8 @@ return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*\*/g,'')
 async function getAIReading(){
   const question = document.getElementById('questionInput').value.trim();
   const N = getNarratorForCard(DECK, drawnCards[0].name); // 「現在の状況」のカードの霊獣を語り部にする
+  document.querySelectorAll('[data-deck-narrator]').forEach(el=>el.textContent=N.name);
+  document.querySelectorAll('[data-deck-emoji]').forEach(el=>el.textContent=N.emoji);
   const btnAI = document.getElementById('btnAI');
   const aiResult = document.getElementById('aiResult');
   const aiReading = document.getElementById('aiReading');
