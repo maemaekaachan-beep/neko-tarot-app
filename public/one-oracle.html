@@ -143,6 +143,7 @@ function formatReading(text){
 }
 async function getAIReading(){
   const question=document.getElementById('questionInput').value.trim();
+  const N=getNarratorForCard(DECK,drawnCard.name);
   const btnAI=document.getElementById('btnAI');
   const aiResult=document.getElementById('aiResult');
   const aiReading=document.getElementById('aiReading');
@@ -150,8 +151,8 @@ async function getAIReading(){
   errorMsg.classList.remove('show');
   btnAI.disabled=true;
   aiResult.classList.add('show');
-  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${DECK.emoji} 🔮 🌙</span>${DECK.narrator}が読んでいる${DECK.loadingSuffix}</div>`;
-  const prompt=`あなたは${DECK.label}占い師の「${DECK.narrator}」です。${DECK.styleInstruction}
+  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${N.emoji} 🔮 🌙</span>${N.name}が読んでいる${N.loadingSuffix}</div>`;
+  const prompt=`あなたは${DECK.label}占い師の「${N.name}」です。${N.styleInstruction}
 
 【ご質問・今の気持ち】
 ${question||'（入力なし：今のあなたへのメッセージをお願いします）'}
@@ -159,14 +160,14 @@ ${question||'（入力なし：今のあなたへのメッセージをお願い�
 【引いたカード】
 【${drawnCard.name}${drawnCard.reversed?'（逆位置）':''}】
 
-このカードが今のあなたに伝えたいメッセージを、200〜250文字程度で温かく具体的に伝えてください。最後に「${DECK.narrator}からひとこと」として短い一言を添えてください。`;
+このカードが今のあなたに伝えたいメッセージを、200〜250文字程度で温かく具体的に伝えてください。最後に「${N.name}からひとこと」として短い一言を添えてください。`;
   try{
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
     if(!text)throw new Error(data.error?.message||'解釈を取得できませんでした');
-    const parts=text.split(`${DECK.narrator}からひとこと`);
-   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>${oneword?`<div class="summary"><h4>${DECK.emoji} ${DECK.narrator}からひとこと</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
+  　const parts=text.split(`${N.name}からひとこと`);
+   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>$...${oneword?`<div class="summary"><h4>${N.emoji} ${N.name}からひとこと</h4>...</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
     
   }catch(err){
     aiResult.classList.remove('show');
