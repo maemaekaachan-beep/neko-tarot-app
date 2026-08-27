@@ -136,6 +136,9 @@ function revealCard(){
     <img class="card-img" src="${drawnCard.img}" alt="${drawnCard.name}"
       onerror="this.outerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;flex-direction:column;gap:8px\\'><span>${DECK.emoji}</span><span style=\\'font-size:11px;color:var(--accent2);text-align:center;padding:0 8px\\'>${nameEscaped}</span></div>'">
   `;
+  const N=getNarratorForCard(DECK,drawnCard.name);
+  document.querySelectorAll('[data-deck-narrator]').forEach(el=>el.textContent=N.name);
+  document.querySelectorAll('[data-deck-emoji]').forEach(el=>el.textContent=N.emoji);
   document.getElementById('btnAI').disabled=false;
 }
 function formatReading(text){
@@ -167,7 +170,7 @@ ${question||'（入力なし：今のあなたへのメッセージをお願い�
     const text=data.content?.[0]?.text||'';
     if(!text)throw new Error(data.error?.message||'解釈を取得できませんでした');
   　const parts=text.split(`${N.name}からひとこと`);
-   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>$...${oneword?`<div class="summary"><h4>${N.emoji} ${N.name}からひとこと</h4>...</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
+   const main=parts[0].trim();const oneword=parts[1]?.trim()||'';aiReading.innerHTML=`<p style="line-height:1.9">${formatReading(main)}</p>${oneword?`<div class="summary"><h4>${N.emoji} ${N.name}からひとこと</h4><p>${formatReading(oneword.replace(/^[:：]\s*/,''))}</p></div>`:''}`;
     
   }catch(err){
     aiResult.classList.remove('show');
