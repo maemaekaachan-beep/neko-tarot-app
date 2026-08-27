@@ -156,27 +156,28 @@ function formatReading(text){
 }
 async function getAIReading(){
   const question=document.getElementById('questionInput').value.trim();
+  const N=getNarratorForCard(DECK,drawnCards[1].name); // 「引き寄せるもの」のカードの霊獣を語り部にする
   const btnAI=document.getElementById('btnAI');const aiResult=document.getElementById('aiResult');const aiReading=document.getElementById('aiReading');const errorMsg=document.getElementById('errorMsg');
   errorMsg.classList.remove('show');btnAI.disabled=true;aiResult.classList.add('show');
-  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${DECK.emoji} 🔮 🌙</span>${DECK.narrator}が星を読んでいる${DECK.loadingSuffix}</div>`;
-  const cardInfo=drawnCards.map((card,i)=>`・${POSITIONS[i].label}：【${card.name}${card.reversed?'（逆位置）':''}】`).join('\n');
-  const prompt=`あなたは${DECK.label}占い師の「${DECK.narrator}」です。${DECK.styleInstruction}
+  aiReading.innerHTML=`<div class="loading"><span class="loading-cats">${N.emoji} 🔮 🌙</span>${N.name}が星を読んでいる${N.loadingSuffix}</div>`;
+  const prompt=`あなたは${DECK.label}占い師の「${N.name}」です。${N.styleInstruction}
+
 
 【現在の状況・気持ち】${question||'（入力なし）'}
 【引いたカード】\n${cardInfo}
 
-「手放すもの：カード名」と「引き寄せるもの：カード名」の見出しでそれぞれ3文ずつ解釈し、最後に「${DECK.narrator}のアドバイス」として3〜4文でまとめ、「${DECK.narrator}からひとこと」で締めてください。`;
+「手放すもの：カード名」と「引き寄せるもの：カード名」の見出しでそれぞれ3文ずつ解釈し、最後に「${N.name}のアドバイス」として3〜4文でまとめ、「${N.name}からひとこと」で締めてください。`;
   try{
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:700,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();const text=(data.content?.[0]?.text||'').replace(/^#+\s*/gm,'');
     if(!text)throw new Error('解釈を取得できませんでした');
-    const parts=text.split(`${DECK.narrator}のアドバイス`);
+    const parts=text.split(`${N.name}のアドバイス`);
     const cardPart=parts[0].trim();const summaryPart=parts[1]?.trim()||'';
     const lines=cardPart.split('\n');let cards=[],current=null;
     let cardHTML=cards.length>0?cards.map(c=>`<div class="card-section ${c.type}"><h4>${formatReading(c.head)}</h4><p>${c.body.map(formatReading).join('<br>')}</p></div>`).join(''):`<div class="card-section"><p>${formatReading(cardPart)}</p></div>`;
-aiReading.innerHTML=cardHTML+(summaryPart?`<div class="summary"><h4>${DECK.emoji} ${DECK.narrator}のアドバイス</h4><p>${formatReading(summaryPart)}</p></div>`:'');
+aiReading.innerHTML=cardHTML+(summaryPart?`<div class="summary"><h4>${N.emoji} ${N.name}のアドバイス</h4><p>${formatReading(summaryPart)}</p></div>`:'');
    
-  }catch(err){aiResult.classList.remove('show');errorMsg.textContent=`エラーが発生しました${DECK.errorSuffix}: ${err.message}`;errorMsg.classList.add('show');}
+  }catch(err){aiResult.classList.remove('show');errorMsg.textContent=`エラーが発生しました${N.errorSuffix}: ${err.message}`;errorMsg.classList.add('show');}
   btnAI.disabled=false;
 }
 
