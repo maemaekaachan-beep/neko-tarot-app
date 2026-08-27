@@ -310,6 +310,8 @@ async function getAIReading(){
   const chosenLabel = selectedChoice === 'A' ? choiceAText : choiceBText;
   const notChosenLabel = selectedChoice === 'A' ? choiceBText : choiceAText;
   const N = getNarratorForCard(DECK, drawnCards[2].name); // 「選ぶと」のカードの霊獣を語り部にする
+  document.querySelectorAll('[data-deck-narrator]').forEach(el=>el.textContent=N.name);
+  document.querySelectorAll('[data-deck-emoji]').forEach(el=>el.textContent=N.emoji);
 
   const btnAI = document.getElementById('btnAI');
   const aiResult = document.getElementById('aiResult');
