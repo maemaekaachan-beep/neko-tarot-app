@@ -121,6 +121,8 @@ function formatReading(text){
     const res=await fetch('/api/reading',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     const text=data.content?.[0]?.text||'';
+    const cleaned=text.replace(/```json\n?/g,'').replace(/```/g,'').trim();
+    const tora=JSON.parse(cleaned);
     toraContent.innerHTML=`
         <div class="tora-big">🐱</div>
         <div class="kotowaza">「${formatReading(tora.kotowaza)}」</div>
